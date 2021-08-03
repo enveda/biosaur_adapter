@@ -96,16 +96,18 @@ def write_feature(args):
         feature.setIntensity( float(row.intensityApex) )
         feature.setOverallQuality( float( row.cos_corr_2 )  )
         feature.setConvexHulls([hull])
-        # feature.setMetaValue(b"ion mobility drift time" , float(row[9]) )
-        # feature.setMetaValue(b"inverse reduced ion mobility" , float(row[9]) )
-        # feature.setMetaValue(b"MZ_lower" , float(row[4]) )
-        # feature.setMetaValue(b"MZ_upper" , float(row[5]) )
-        # feature.setMetaValue(b"RT_lower" , float(row[7]) )
-        # feature.setMetaValue(b"RT_upper" , float(row[8]) )
-        # feature.setMetaValue(b"Mobility_lower" , float(row[10]) )
-        # feature.setMetaValue(b"Mobility_upper" , float(row[11]) )
-        # feature.setMetaValue(b"ClusterCount" , float(row[14]) )    
-        
+        feature.setMetaValue(b"biosaur_massCalib" , float(row.massCalib) )
+        feature.setMetaValue(b"biosaur_rtApex" , float(row.rtApex) )
+        feature.setMetaValue(b"biosaur_intensityApex" , float(row.intensityApex) )
+        feature.setMetaValue(b"biosaur_charge" , float(row.charge) )  
+        feature.setMetaValue(b"biosaur_nIsotopes" , float(row.nIsotopes) )    
+        feature.setMetaValue(b"biosaur_nScans" , float(row.nScans) )     
+        feature.setMetaValue(b"biosaur_cos_corr_1" , float(row.cos_corr_1) )     
+        feature.setMetaValue(b"biosaur_cos_corr_2" , float(row.cos_corr_2) )     
+        feature.setMetaValue(b"biosaur_diff_for_output" , float(row.diff_for_output) )                              
+        feature.setMetaValue(b"biosaur_ion_mobility" , float(row.ion_mobility) )
+        feature.setMetaValue(b"biosaur_FAIMS" , float(row.FAIMS) )        
+
         fm.push_back(feature)
     
     logging.info("writing featureXML: {}".format(args['output']))
@@ -137,13 +139,20 @@ def main():
     parser.add_argument(
         '-in',
         '--input',
+        required=True,
         help='Input File')
 
     parser.add_argument(
-        '-np',
-        '--number_of_processes',
-        help='Number of processes',
-        default=0)
+        '-out',
+        '--output',
+        help='Output File')
+
+
+    parser.add_argument(
+        '-pxfp',
+        '--pep_xml_file_path',
+        default='0',
+        help='Pepxml filepath')
 
     parser.add_argument(
         '-cm',
@@ -207,36 +216,31 @@ def main():
         default=1.3)
 
     parser.add_argument(
+        '-np',
+        '--number_of_processes',
+        help='Number of processes',
+        default=0)
+
+    parser.add_argument(
         '--debug',
         action='store_true',
         help='Enable debugging output')
-
-    parser.add_argument(
-        '-out',
-        '--output',
-        help='Output File')
-
-    parser.add_argument(
-        '-pxfp',
-        '--pep_xml_file_path',
-        default='0',
-        help='Pepxml filepath')
 
     logging.basicConfig(level=logging.INFO)
 
     args = process_arg(parser.parse_args())
 
-    
+    # Create input arg for Biosaur
     args["input_mzml_path"] = [ args["input"] ]
-    
+
+    # Force the output for Biosaur to conform to the following
     args["output_file"] = "{}.features.tsv".format(os.path.splitext(args["input"])[0])
     
+    # If not set, supply a defaute featureXML file name
     if args["output"] == None:
         args["output"] = "{}.featureXML".format(os.path.splitext(args["input"])[0])
 
-
-    print(args)
-
+    # Fortunately Biosaur uses the logging package
     bsr.bio.process_files(args)
 
     write_feature(args)
