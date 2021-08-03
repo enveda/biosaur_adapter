@@ -6,8 +6,8 @@ LABEL docker_author="Michael A. Freitas"
 LABEL docker_maintainer="mike.freitas@gmail.com"
 LABEL dockerhub="mfreitas/biosaur"
 
-RUN apt-get update -y && DEBIAN_FRONTEND=noninteractive apt-get install \
-    libgtk2.0-dev python3-pip procps -y && \
+RUN apt-get update -y  && DEBIAN_FRONTEND=noninteractive apt-get install \
+    --fix-missing libgtk2.0-dev python3-pip procps -y && \
     rm -rf /var/lib/apt/lists/*
 
 ADD ./Biosaur /build
@@ -18,7 +18,7 @@ RUN cd /build && \
     cd / && \
     rm -rf /build
 
-ADD featurexml.py /usr/local/bin/
+ADD BiosaurAdapter.py /usr/local/bin/BiosaurAdapter
 
 
 
