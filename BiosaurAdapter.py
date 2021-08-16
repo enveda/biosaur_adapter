@@ -68,14 +68,20 @@ def write_feature(args):
         
     logging.info("Reading features from Biosaur")
 
-    df = pd.read_csv(args["output_file"], sep='\t')
-
+    df = pd.read_csv(args["output_file"], sep=',')
+    #print(df)
+    #print(df.columns)
     #Create and Populate FeatureMap
 
-    print([ bytes(args["input"].encode()) ])
+    #print([ bytes(args["input"].encode()) ])
     fm = FeatureMap()
     fm.setPrimaryMSRunPath( [ bytes(args["input"].encode()) ] )
+    #for index, row in df.iterrows():
+    
     for row in df.itertuples():
+
+        # print(row)
+
         feature = Feature()
 
         rtStart = row.rtStart*60.0
@@ -167,6 +173,12 @@ def main():
         action='store_true')
 
     parser.add_argument(
+        '-sb',
+        '--skip_biosaur',
+        help='write_featurexml',
+        action='store_true')
+
+    parser.add_argument(
         '-ac',
         '--mass_accuracy',
         help='Mass accuracy',
@@ -241,9 +253,11 @@ def main():
         args["output"] = "{}.featureXML".format(os.path.splitext(args["input"])[0])
 
     # Fortunately Biosaur uses the logging package
-    bsr.bio.process_files(args)
-
+    if not args["skip_biosaur"]:
+        bsr.bio.process_files(args)
+    
     write_feature(args)
+
     
 if __name__ == "__main__":
     
